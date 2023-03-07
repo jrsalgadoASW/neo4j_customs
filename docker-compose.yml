@@ -9,8 +9,10 @@ services:
       - "7687:7687"
     environment:
       NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+      NEO4JLABS_PLUGINS: '["apoc"]'
     volumes:
       - /.data
       - /.logs
       - ./datamart_csv:/var/lib/neo4j/import
+      - ./plugins:/plugins
     restart: always

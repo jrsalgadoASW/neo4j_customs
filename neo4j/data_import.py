@@ -57,7 +57,7 @@ CREATE (:Status {CDESTADO: row.CDESTADO, DSESTADO: row.DSESTADO})
 # registry fact
 registry_query = """
 LOAD CSV WITH HEADERS FROM $file_path AS row
-CREATE (:Facts {IdFact: row.IdFact, FechaRechazoID: row.FechaRechazoID,FechaAprobacionID: row.FechaAprobacionID, FechaDefinitivoID:row.FechaDefinitivoID, FechaRevisionID: row.FechaRevisionID,FechaDigitalizacionID: row.FechaDigitalizacionID, ProductID: row.ProductID, PaisOrigenID: row.PaisOrigenID, PaisBanderaID: row.PaisBanderaID, PaisDestinoID: row.PaisDestinoID, PaisProcedenciaID: row.PaisProcedenciaID, PaisCompraID: row.PaisCompraID, EmpresaID: row.EmpresaID, ImporterId: row.ImporterId, SiaID: row.SiaID, StatusID: row.StatusID, TransactionTypeID: row.TransactionTypeID, Quantity: row.Quantity, Price: row.Price, Peso_bruto: row.Peso_bruto, Peso_neto: row.Peso_neto, Fletes: row.Fletes, FOB: row.FOB })
+CREATE (:Facts {IdFact: row.IdFact, FechaRechazoID: row.FechaRechazoID,FechaAprobacionID: row.FechaAprobacionID, FechaDefinitivoID:row.FechaDefinitivoID, FechaRevisionID: row.FechaRevisionID,FechaDigitalizacionID: row.FechaDigitalizacionID, ProductoID: row.ProductoID, PaisOrigenID: row.PaisOrigenID, PaisBanderaID: row.PaisBanderaID, PaisDestinoID: row.PaisDestinoID, PaisProcedenciaID: row.PaisProcedenciaID, PaisCompraID: row.PaisCompraID, EmpresaID: row.EmpresaID, ImporterId: row.ImporterId, SiaID: row.SiaID, EstadoID: row.EstadoID, TipoTransaccionID: row.TipoTransaccionID, CANTIDAD: row.CANTIDAD, PRECIO: row.PRECIO, PESO_BRUTO: row.PESO_BRUTO, PESO_NETO: row.PESO_NETO, FLETES: row.FLETES, FOB: row.FOB })
 """
 transactionType_query = """
 LOAD CSV WITH HEADERS FROM $file_path AS row
@@ -73,7 +73,7 @@ queries = [
     sia_query,
     estado_query,
     registry_query,
-    transactionType_query
+    transactionType_query,
 ]
 company_path = "file:///DimCompany.csv"
 country_path = "file:///DimCountry.csv"
@@ -121,16 +121,78 @@ def load_status(tx):
 def load_facts(tx):
     tx.run(registry_query, file_path=fact_path)
 
+
 def load_transactionType(tx):
     tx.run(transactionType_query, file_path=transactionType_path)
 
+
+def drop_all(tx):
+    query = """
+   CALL apoc.periodic.iterate(
+    "MATCH (n) RETURN n",
+    "DETACH DELETE n",
+    {batchSize: 2000, parallel: 'false'}
+)
+    """
+    tx.run(query)
+
+
+def create_facts_status_relationship(tx):
+    query = """
+    CALL apoc.periodic.iterate(
+        "MATCH (fact:Facts)
+        MATCH (status:Status)
+        WHERE fact.EstadoID = status.CDESTADO
+        RETURN fact, status",
+
+        "MERGE (fact)-[:status_transaction]->(status)",
+
+        {batchSize:2000, parallel:false}
+    )
+    """
+    tx.run(query)
+
+def create_product_relationship(tx):
+    query="""
+    CALL apoc.periodic.iterate(
+        "MATCH (fact:Facts)
+        MATCH (product:Product)
+        WHERE fact.ProductoID = product.ProductID
+        RETURN fact, product",
+
+        "MERGE (fact)-[:Tiene]->(product)",
+        
+        {batchSize:2000, parallel:false}
+    )
+    """
+    tx.run(query)
+    
+def create_empresa_relationship(tx):
+    query = """
+    CALL apoc.periodic.iterate(
+        "MATCH (fact:Facts)
+        MATCH (empresa:Company)
+        WHERE fact.EmpresaID = empresa.CDCIA_USUARIA
+        RETURN fact, empresa",
+        "MERGE (fact)-[:Belongs]->(empresa)",
+        {batchSize:2000, parallel:false}
+    )
+    """
+    tx.run(query)
+
 with driver.session() as session:
-    session.write_transaction(load_company)
-    session.write_transaction(load_country)
-    session.write_transaction(load_date)
-    session.write_transaction(load_facts)
-    session.write_transaction(load_importer)
-    session.write_transaction(load_product)
-    session.write_transaction(load_status)
-    session.write_transaction(load_sia)
-    session.write_transaction(load_transactionType)
+    # session.execute_write(drop_all)
+    # session.execute_write(load_company)
+    # session.execute_write(load_country)
+    # session.execute_write(load_date)
+    # session.execute_write(load_facts)
+    # session.execute_write(load_importer)
+    # session.execute_write(load_product)
+    # session.execute_write(load_status)
+    # session.execute_write(load_sia)
+    # session.execute_write(load_transactionType)
+
+    # session.execute_write(create_facts_status_relationship)
+    # session.execute_write(create_product_relationship)
+    session.execute_write(create_empresa_relationship)
+
