@@ -23,7 +23,7 @@ docker compose up -d
 ```
 pip install -r requirements.txt
 ```
-Correr la importación de los datos en neo4j/data_import.py (puede tardarse unos minutos).
+Correr la importación de los datos en [neo4j/data_import.py](data_import.py) (puede tardarse unos minutos).
 
 ```
 python neo4j/data_import.py
@@ -37,6 +37,6 @@ python neo4j/data_import.py
 
 ## Neodash y documentación.
 
-Dentro de neodash, importar los dashboards con el archivo ubicado en neo4j/dashboard_importaciones.json
+Dentro de neodash, importar los dashboards con el archivo ubicado en [dashboard_importaciones](/neo4j/dashboard_importaciones.json).json
 
-Para revisar la documentación de los queries, revisar el archivo ubicado en neo4j/neo4j_queries.ipynb
+Para revisar la documentación de los queries, revisar el archivo ubicado en [neo4j_queries.ipynb](neo4j/neo4j_queries.ipynb)
