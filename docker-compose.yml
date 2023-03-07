@@ -3,7 +3,7 @@ version: '3.9'
 services:
   neo4j:
     image: neo4j:5.5.0
-    container_name: server1
+    container_name: neo4j-server
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -18,3 +18,14 @@ services:
       - ./datamart_csv:/var/lib/neo4j/import
       - ./plugins:/plugins
     restart: always
+
+  neodash:
+    image: neo4jlabs/neodash
+    container_name: neodash
+    ports:
+      - "5005:5005"
+    environment:
+      NEO4J_URI: "neo4j://localhost:7687"
+      NEO4J_AUTH: "neo4j/secure?password"
+    depends_on:
+      - neo4j
