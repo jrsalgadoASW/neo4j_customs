@@ -1,0 +1,168 @@
+{
+  "title": "Importaciones",
+  "version": "2.2",
+  "settings": {
+    "pagenumber": 1,
+    "editable": true,
+    "fullscreenEnabled": false,
+    "parameters": {}
+  },
+  "pages": [
+    {
+      "title": "Main Page",
+      "reports": [
+        {
+          "title": "Hi there 👋",
+          "query": "**This is your first dashboard!** \n \nYou can click (⋮) to edit this report, or add a new report to get started. You can run any Cypher query directly from each report and render data in a variety of formats. \n \nTip: try _renaming_ this report by editing the title text. You can also edit the dashboard header at the top of the screen.\n\n\n",
+          "width": 3,
+          "height": 2,
+          "x": 0,
+          "y": 0,
+          "type": "text",
+          "selection": {},
+          "settings": {}
+        },
+        {
+          "title": "",
+          "query": "MATCH (n)-[e]->(m) RETURN n,e,m LIMIT 20\n\n\n",
+          "width": 3,
+          "height": 2,
+          "x": 3,
+          "y": 0,
+          "type": "graph",
+          "selection": {
+            "Facts": "(label)",
+            "Status": "(label)"
+          },
+          "settings": {
+            "nodePositions": {}
+          }
+        }
+      ]
+    },
+    {
+      "title": "",
+      "reports": [
+        {
+          "title": "Recuento de tipo de industria por cada importación",
+          "query": "\nMATCH (fact:Facts)-[empresaId:Company]->(empresa:Company)\n    WITH empresa.DSTIPO_ACTIVIDAD AS property, count(*) AS count\n    RETURN property, count\n\n",
+          "width": 4,
+          "height": 2,
+          "x": 0,
+          "y": 0,
+          "type": "bar",
+          "selection": {
+            "index": "property",
+            "value": "count",
+            "key": "(none)"
+          },
+          "settings": {
+            "nodePositions": {}
+          }
+        },
+        {
+          "title": "Recuento de tipo de ítem por cada importación",
+          "query": "MATCH (fact:Facts)-[:producto]->(producto:Product)\n    WITH producto.TIPO_ITEM AS property, count(*) AS count\n    RETURN property, count\n",
+          "width": 4,
+          "height": 2,
+          "x": 4,
+          "y": 0,
+          "type": "pie",
+          "selection": {
+            "index": "property",
+            "value": "count",
+            "key": "(none)"
+          },
+          "settings": {
+            "nodePositions": {}
+          }
+        },
+        {
+          "title": "Top 5 países exportadores (País Origen)",
+          "query": "MATCH (f:Facts)-[:PaisOrigen]->(po:Country)\nWITH po.CountryName AS property, SUM(toFloat(f.PRECIO)) AS sum\nORDER BY sum DESC\nLIMIT 5\nRETURN property, sum\n\n\n",
+          "width": 4,
+          "height": 2,
+          "x": 8,
+          "y": 0,
+          "type": "bar",
+          "selection": {
+            "index": "property",
+            "value": "sum",
+            "key": "(none)"
+          },
+          "settings": {
+            "nodePositions": {},
+            "colors": "category10"
+          }
+        },
+        {
+          "title": "Top 5 países exportadores (País Procedencia)",
+          "query": "\nMATCH (f:Facts)-[:PaisProcedencia]->(po:Country)\nWITH po.CountryName AS property, SUM(toFloat(f.PRECIO)) AS sum\nORDER BY sum DESC\nLIMIT 5\nRETURN property, sum\n\n",
+          "width": 4,
+          "height": 2,
+          "x": 0,
+          "y": 2,
+          "type": "bar",
+          "selection": {
+            "index": "property",
+            "value": "sum",
+            "key": "(none)"
+          },
+          "settings": {
+            "nodePositions": {},
+            "colors": "paired"
+          }
+        },
+        {
+          "title": "Fechas de aprobación por año",
+          "query": "\n\nMATCH (f:Facts)-[:FechaAprobacion]->(fechaAprobacion:Date)\nWITH fechaAprobacion.DateYear as property, count(*) as count\nRETURN property, count\n",
+          "width": 4,
+          "height": 2,
+          "x": 4,
+          "y": 2,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "nodePositions": {}
+          }
+        },
+        {
+          "title": "Fechas Definitivas",
+          "query": "MATCH (f:Facts)-[:FechaDefinitivo]->(fechaAprobacion:Date)\nWITH fechaAprobacion.DateYear as property, count(*) as count\nRETURN property, count\n\n\n",
+          "width": 4,
+          "height": 2,
+          "x": 8,
+          "y": 2,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "nodePositions": {}
+          }
+        },
+        {
+          "title": "Importaciones por mes",
+          "query": "MATCH (f:Facts)-[:FechaAprobacion]->(fechaAprobacion:Date)\nWITH fechaAprobacion.DateMonth as property, count(*) as count\nORDER BY property\nRETURN property, count\n\n\n",
+          "width": 4,
+          "height": 2,
+          "x": 0,
+          "y": 4,
+          "type": "line",
+          "selection": {
+            "x": "property",
+            "value": [
+              "count"
+            ]
+          },
+          "settings": {
+            "nodePositions": {},
+            "legend": true,
+            "colors": "category10",
+            "curve": "linear"
+          }
+        }
+      ]
+    }
+  ],
+  "parameters": {},
+  "extensions": {}
+}
